@@ -1,0 +1,24 @@
+{
+  "project": {
+    "name": "Rangers",
+    "version": "0.1.0",
+    "description": "Shared dashboard platform for building and sharing widgets, scrapers, market watchers, and automation tools",
+    "languages": ["javascript", "python"],
+    "teamSize": 3
+  },
+  "architecture": {
+    "type": "widget-based-dashboard",
+    "frontend": "TBD",
+    "backend": "TBD",
+    "database": "none (file-based for now)"
+  },
+  "modules": {
+    "widgets": 3,
+    "scrapers": 0,
+    "automations": 0,
+    "marketWatchers": 0
+  },
+  "team": {
+    "members": ["noah", "chase", "josh"]
+  }
+}

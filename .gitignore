@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+.next/
+out/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+test-results/
+playwright-report/
+coverage/
+.pytest_cache/
+htmlcov/
+
+# Claude Flow runtime data
+.claude-flow/
+.swarm/
+.agentdb/
+
+# Debug logs
+debug-*.log
+*.log
+
+# Package locks (keep one, ignore duplicates)
+# package-lock.json  # uncomment if using yarn/pnpm instead
