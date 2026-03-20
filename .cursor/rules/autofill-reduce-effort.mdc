@@ -1,0 +1,15 @@
+---
+description: Autofill everywhere possible — reduce manual effort, simplicity first
+alwaysApply: true
+---
+
+# Autofill & Simplicity
+
+Every field that can be inferred, prefilled, or auto-suggested should be. The goal is minimal manual input.
+
+1. **Autofill from context**: When a user selects a related entity (widget, tool, user profile), cascade-fill all fields that can be derived from that selection.
+2. **Autocomplete on text fields**: Any text field that maps to existing data should show a filtered dropdown as the user types. Selecting a match fills the field and any related fields.
+3. **Smart defaults**: Pre-populate fields with the most common or most recent value when context allows.
+4. **1-click goal**: The user should only need to type what is truly new information. Everything else should be prefilled, auto-selected, or derived.
+5. **No redundant entry**: If data exists anywhere in the system, never ask the user to re-type it. Pull it from the source.
+6. **Progressive disclosure**: Show only required fields first. Reveal optional fields on expand or when context requires them.

@@ -1,0 +1,13 @@
+# Rangers CODEOWNERS — each ranger owns their folder
+# GitHub usernames needed. Update these when everyone joins.
+
+# Noah owns his folder + shared/config (project lead)
+/src/rangers/noah/    @RCNoah-npc
+/src/shared/          @RCNoah-npc
+/config/              @RCNoah-npc
+
+# Chase owns his folder (update GitHub username)
+/src/rangers/chase/   @RCNoah-npc
+
+# Josh owns his folder (update GitHub username)
+/src/rangers/josh/    @RCNoah-npc

@@ -1,0 +1,13 @@
+{
+  "plugins": {
+    "vercel": {
+      "enabled": true
+    },
+    "stripe": {
+      "enabled": false
+    },
+    "figma": {
+      "enabled": true
+    }
+  }
+}

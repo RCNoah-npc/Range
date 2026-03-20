@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr:*)",
+      "Bash(npm run:*)",
+      "Bash(npx playwright:*)",
+      "Bash(python:*)",
+      "Bash(pip:*)",
+      "Bash(pytest:*)",
+      "Bash(npx -y @claude-flow/cli@latest doctor --fix)",
+      "Bash(npx -y @claude-flow/cli@latest config init)",
+      "Bash(gh repo:*)",
+      "Bash(git remote:*)",
+      "Bash(git fetch:*)",
+      "Bash(gh api:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "claude-flow"
+  ]
+}
