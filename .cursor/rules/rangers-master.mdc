@@ -1,0 +1,48 @@
+---
+description: Rangers shared dashboard platform — master project context and standards
+alwaysApply: true
+---
+
+# Rangers — Master Project Context
+
+## Identity
+- **Project**: Rangers — shared dashboard platform
+- **Users**: ~6 friends building and sharing widgets, scrapers, market watchers, automation tools
+- **Architecture**: Widget-based dashboard with shared builds, per-user customization
+- **Languages**: JavaScript (frontend, widgets, tooling) + Python (scrapers, automation, data processing)
+
+## Core Principles
+1. **Composability**: Every tool/widget must be self-contained and composable into any dashboard layout
+2. **Share-first**: All builds are shareable by default — widgets, tools, scrapers can be pulled into any member's dashboard
+3. **Dual-language**: JS for frontend/interactive widgets, Python for backend automation/data — both are first-class
+4. **Fun-first**: This is a creative playground — prioritize cool functionality and fast iteration over enterprise patterns
+5. **Multi-user**: Each user has their own dashboard state, but can browse and import each other's widgets
+
+## File Organization
+- `/src/widgets/` — Individual widget modules (JS)
+- `/src/scrapers/` — Python scrapers and data collectors
+- `/src/automation/` — Python automation tools
+- `/src/dashboard/` — Dashboard framework and layout engine
+- `/src/shared/` — Shared utilities used by both JS and Python
+- `/src/api/` — API layer connecting frontend to Python backends
+- `/config/` — Project configuration and shared facts
+- `/tests/` — Test files (both JS and Python)
+- `/scripts/` — Build, deploy, and utility scripts
+- `/docs/` — Documentation
+
+## Design Direction
+- Dark theme by default (developer/hacker aesthetic)
+- Widget cards with clean borders, grid-based layout
+- Draggable/resizable widget placement
+- Each user gets their own color accent for attribution
+- Minimal chrome — maximize widget content area
+
+## Hard Rules
+- R1: Every widget must export a standard interface (render, configure, destroy)
+- R2: No widget may directly access another widget's state — use the shared event bus
+- R3: Python tools must expose a JSON API endpoint for the JS frontend to consume
+- R4: All user data must be scoped by user ID — no cross-user data leaks
+- R5: Secrets go in .env.local only — never in code, never committed
+- R6: Widget configs are JSON — no YAML, no TOML for widget definitions
+- R7: Every scraper must have a rate-limit configuration
+- R8: All market watchers must cache data — don't hit external APIs on every render

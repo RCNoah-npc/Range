@@ -1,0 +1,19 @@
+---
+description: Interactive Playwright TDD — write spec first, implement, debug, run until all targeted tests pass
+alwaysApply: true
+---
+
+# Playwright — interactive test-first loop
+
+When shipping or changing **user-facing** behavior that warrants E2E coverage:
+
+1. **Write the Playwright spec first** (new file or extend `e2e/**/*.spec.ts`): full interactive flow, stable locators (`data-testid` where it helps), explicit assertions. Do not implement the feature and add tests only as an afterthought unless the user explicitly asks otherwise.
+2. **Implement** code until the spec's behavior is satisfied.
+3. **Debug** failures (timeouts, selectors, auth, env); fix the app or the test until behavior matches intent.
+4. **Re-run** tests until **100% pass** for the scoped spec(s) and Playwright **project** (e.g. `admin`):
+   `npx playwright test <path-or-pattern> --project=admin`
+   Do not treat the task as complete with failing tests or skips that avoid required behavior (data-dependent branches are fine if both paths are asserted, as in optional empty-state vs list-state).
+5. **Base URL:** `playwright.config.ts` may default to a remote deploy. If that deploy does not yet include the change, run against local:
+   `E2E_BASE_URL=http://localhost:3000` with `npm run dev` running.
+
+Vitest/unit tests remain separate; this rule is the **interactive Playwright** success bar the user expects.

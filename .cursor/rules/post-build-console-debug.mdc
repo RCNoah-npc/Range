@@ -1,0 +1,14 @@
+---
+description: After every build that refreshes localhost, run debug in the browser console and confirm it loads before finishing the coding update.
+alwaysApply: true
+---
+
+# Post-Build Console Verification
+
+After every build that refreshes the localhost browser:
+
+1. **Run the debug program** in the browser's developer console (e.g. the project's debug script or a defined verification snippet).
+2. **Confirm it loads** — the debug run completes without error and indicates the app or page is ready.
+3. **Only then** consider the coding update complete and stop. Do not claim the update is done until this console verification has run and succeeded.
+
+If the project defines a specific debug script or console command, use that. Otherwise run a minimal sanity check in the console (e.g. confirm the app root or key globals exist, or that there are no critical console errors) and treat that as the "debug program" for this step.
