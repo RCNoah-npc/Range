@@ -3,6 +3,7 @@
  * Export all your widgets here — the registry picks them up automatically.
  */
 import { Widget } from '../../shared/widget-base.js';
+import { CompressionWidget } from './compression-widget.js';
 
 export class HelloWidget extends Widget {
   constructor() {
@@ -19,4 +20,7 @@ export class HelloWidget extends Widget {
   }
 }
 
-export const widgets = [new HelloWidget()];
+export const widgets = [
+  new HelloWidget(),
+  new CompressionWidget(),
+];
