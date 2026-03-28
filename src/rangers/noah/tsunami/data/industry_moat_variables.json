@@ -1,0 +1,253 @@
+{
+  "Government_Defense_Tech": {
+    "description": "Companies selling software/services to government agencies (PLTR, BAH, LDOS, SAIC)",
+    "moat_variables": {
+      "contract_backlog_ratio": {
+        "description": "Secured long-term backlog as % of annual revenue",
+        "signal": "Higher = stronger moat, more predictable revenue",
+        "thresholds": {"weak": 0.5, "moderate": 1.5, "strong": 3.0},
+        "source": "10-K backlog disclosures",
+        "weight": 0.25
+      },
+      "contract_renewal_rate": {
+        "description": "% of contracts renewed with same agency on re-compete",
+        "signal": "Higher = high switching costs, agency locked in",
+        "thresholds": {"weak": 0.50, "moderate": 0.70, "strong": 0.85},
+        "source": "10-K, earnings calls, FPDS.gov",
+        "weight": 0.25
+      },
+      "gov_revenue_concentration": {
+        "description": "Government revenue as % of total revenue",
+        "signal": "20-40% is optimal stability. >60% = dependency risk. <10% = not a real gov contractor",
+        "thresholds": {"too_low": 0.10, "optimal_low": 0.20, "optimal_high": 0.40, "dependency": 0.60},
+        "source": "10-K segment reporting",
+        "weight": 0.15
+      },
+      "agency_diversification": {
+        "description": "Number of distinct agency customers / revenue spread",
+        "signal": "More agencies = less single-point-of-failure risk",
+        "thresholds": {"weak": 3, "moderate": 8, "strong": 15},
+        "source": "10-K, USAspending.gov",
+        "weight": 0.10
+      },
+      "contract_type_mix": {
+        "description": "Ratio of cost-plus vs fixed-price vs T&M contracts",
+        "signal": "Cost-plus = lower risk, fixed-price = higher margin but more risk",
+        "optimal_mix": "40-60% cost-plus for stability",
+        "source": "10-K",
+        "weight": 0.10
+      },
+      "clearance_moat": {
+        "description": "% of workforce with active security clearances",
+        "signal": "High clearance workforce = massive barrier to entry for competitors",
+        "thresholds": {"weak": 0.20, "moderate": 0.50, "strong": 0.75},
+        "source": "10-K, job postings",
+        "weight": 0.10
+      },
+      "set_aside_eligibility": {
+        "description": "Qualifies for small business set-aside contracts",
+        "signal": "Temporary high-value moat but expires with growth",
+        "applies_to": "companies under SBA size standards",
+        "weight": 0.05
+      }
+    },
+    "compression_triggers": {
+      "budget_sequestration": "Federal budget cuts directly reduce addressable market",
+      "recompete_loss": "Losing a major recompete signals moat erosion",
+      "clearance_bottleneck": "If clearance processing slows, growth stalls",
+      "administration_change": "New president may shift priorities away from tech vendors",
+      "audit_findings": "DCAA audit issues can freeze contract awards"
+    },
+    "example_companies": {
+      "PLTR": {"backlog_ratio": 2.1, "renewal_rate": 0.82, "gov_concentration": 0.55, "clearance_pct": 0.40},
+      "BAH": {"backlog_ratio": 3.5, "renewal_rate": 0.90, "gov_concentration": 0.95, "clearance_pct": 0.70},
+      "LDOS": {"backlog_ratio": 2.8, "renewal_rate": 0.88, "gov_concentration": 0.85, "clearance_pct": 0.65},
+      "SAIC": {"backlog_ratio": 2.5, "renewal_rate": 0.85, "gov_concentration": 0.90, "clearance_pct": 0.60}
+    }
+  },
+
+  "Enterprise_SaaS": {
+    "description": "B2B software sold on subscription (CRM, WDAY, HUBS, NOW)",
+    "moat_variables": {
+      "net_revenue_retention": {
+        "description": "NRR - revenue from existing customers year over year including expansion",
+        "signal": ">120% = strong expansion moat. <100% = customers leaving",
+        "thresholds": {"weak": 1.00, "moderate": 1.10, "strong": 1.30},
+        "source": "earnings calls, 10-K",
+        "weight": 0.30
+      },
+      "avg_contract_length": {
+        "description": "Average contract duration in years",
+        "signal": "Multi-year = switching cost moat. Month-to-month = no lock-in",
+        "thresholds": {"weak": 1.0, "moderate": 2.0, "strong": 3.0},
+        "source": "10-K, S-1",
+        "weight": 0.20
+      },
+      "platform_ecosystem_size": {
+        "description": "Number of third-party apps/integrations on the platform",
+        "signal": "Large ecosystem = network effect moat (Salesforce AppExchange)",
+        "thresholds": {"weak": 50, "moderate": 500, "strong": 3000},
+        "source": "marketplace listings",
+        "weight": 0.15
+      },
+      "data_gravity": {
+        "description": "Does the product accumulate proprietary customer data that's hard to migrate?",
+        "signal": "CRM data, HR records, financial history = high switching cost",
+        "values": ["none", "low", "medium", "high", "critical"],
+        "source": "product analysis",
+        "weight": 0.15
+      },
+      "enterprise_customer_pct": {
+        "description": "% of revenue from enterprise (>1000 employees) vs SMB",
+        "signal": "Enterprise = sticky multi-year deals. SMB = high churn",
+        "thresholds": {"weak": 0.20, "moderate": 0.50, "strong": 0.75},
+        "source": "10-K, earnings calls",
+        "weight": 0.10
+      },
+      "magic_quadrant_position": {
+        "description": "Gartner Magic Quadrant leader status",
+        "signal": "Leader = procurement shortlist default. Niche = at risk",
+        "values": ["niche", "visionary", "challenger", "leader"],
+        "source": "Gartner",
+        "weight": 0.10
+      }
+    },
+    "compression_triggers": {
+      "nrr_decline": "NRR dropping below 100% = customers actively leaving",
+      "platform_commoditization": "Core feature gets built into larger platform (e.g., Slack into Teams)",
+      "open_source_alternative": "Free alternative reaches feature parity",
+      "pricing_pressure": "Competitor undercuts significantly",
+      "integration_bypass": "Customers build the feature internally"
+    }
+  },
+
+  "Consumer_Social": {
+    "description": "B2C social/content platforms (META, SNAP, PINS, RDDT)",
+    "moat_variables": {
+      "daily_active_users": {
+        "description": "DAU and DAU/MAU ratio (engagement depth)",
+        "signal": "High DAU/MAU = habitual use = strong network effect",
+        "thresholds": {"weak": 0.30, "moderate": 0.50, "strong": 0.70},
+        "weight": 0.25
+      },
+      "time_spent_per_user": {
+        "description": "Average daily minutes per user",
+        "signal": "More time = more ad inventory = more revenue per user",
+        "thresholds": {"weak": 10, "moderate": 25, "strong": 40},
+        "weight": 0.20
+      },
+      "arpu_trend": {
+        "description": "Average Revenue Per User trend (growing or shrinking)",
+        "signal": "Growing ARPU = monetization improving. Shrinking = losing ad share",
+        "weight": 0.20
+      },
+      "content_creator_economy": {
+        "description": "Number of creators earning money on the platform",
+        "signal": "Creator economy = supply-side network effect (YouTube, TikTok)",
+        "weight": 0.15
+      },
+      "social_graph_depth": {
+        "description": "How interconnected are users (friends, followers, groups)",
+        "signal": "Deep graph = massive switching cost (leaving means losing connections)",
+        "weight": 0.20
+      }
+    },
+    "compression_triggers": {
+      "user_growth_stall": "DAU growth flat or declining",
+      "engagement_decline": "Time spent per user dropping",
+      "ad_revenue_shift": "Advertisers moving budget to competitor platform",
+      "feature_clone": "Competitor clones core differentiator (IG Stories killed Snap)",
+      "regulatory_action": "Privacy regulation limits ad targeting capability"
+    }
+  },
+
+  "EdTech": {
+    "description": "Education technology (CHGG, COUR, DUOL, TWOU)",
+    "moat_variables": {
+      "content_exclusivity": {
+        "description": "% of content that is proprietary vs commoditized",
+        "signal": "Proprietary content = moat. Public domain / AI-generated = no moat",
+        "weight": 0.30
+      },
+      "credential_value": {
+        "description": "Does the platform grant recognized credentials/degrees?",
+        "signal": "Accredited degrees = strong moat. Certificates = weak moat",
+        "weight": 0.25
+      },
+      "institutional_partnerships": {
+        "description": "Number of university/employer partnerships",
+        "signal": "More partners = distribution moat",
+        "weight": 0.20
+      },
+      "ai_replaceability": {
+        "description": "Can an AI chatbot provide the same service?",
+        "signal": "If ChatGPT can do what you do, you have no moat",
+        "values": ["not_replaceable", "partially", "mostly", "fully_replaceable"],
+        "weight": 0.25
+      }
+    },
+    "compression_triggers": {
+      "ai_tutoring_parity": "AI reaches feature parity with human tutoring",
+      "free_alternative": "Khan Academy, YouTube, or AI provides same content free",
+      "enrollment_decline": "University enrollment drops reduce TAM",
+      "credential_devaluation": "Employers stop valuing the credentials offered"
+    }
+  },
+
+  "Freelance_Gig_Marketplace": {
+    "description": "Gig economy platforms (FVRR, UPWK)",
+    "moat_variables": {
+      "take_rate": {
+        "description": "Platform commission as % of transaction value",
+        "signal": "High take rate only sustainable with strong network effects",
+        "weight": 0.20
+      },
+      "supply_side_lock_in": {
+        "description": "How hard is it for freelancers to leave (reputation, reviews)",
+        "signal": "Portable reputation = weak moat. Platform-locked reputation = strong",
+        "weight": 0.30
+      },
+      "buyer_repeat_rate": {
+        "description": "% of buyers who return for repeat purchases",
+        "signal": "High repeat = marketplace working. Low = one-time transactions",
+        "weight": 0.25
+      },
+      "ai_automation_exposure": {
+        "description": "% of listed services that AI can now perform",
+        "signal": "Writing, design, coding tasks increasingly automated",
+        "weight": 0.25
+      }
+    }
+  },
+
+  "BPO_CallCenter": {
+    "description": "Business process outsourcing (TEP, TASK, CNXC)",
+    "moat_variables": {
+      "headcount_trend": {
+        "description": "Employee headcount growth/decline",
+        "signal": "Declining headcount = AI replacing human agents",
+        "weight": 0.25
+      },
+      "average_handle_time": {
+        "description": "Average time per customer interaction",
+        "signal": "If AHT is decreasing via AI, fewer humans needed",
+        "weight": 0.20
+      },
+      "client_concentration": {
+        "description": "Top 5 clients as % of revenue",
+        "signal": "High concentration = one client leaving is catastrophic",
+        "weight": 0.20
+      },
+      "automation_adoption_rate": {
+        "description": "% of interactions handled by AI/automation",
+        "signal": "Industry rapidly automating, margin pressure accelerating",
+        "weight": 0.20
+      },
+      "contract_stickiness": {
+        "description": "Average contract length and switching cost",
+        "signal": "Multi-year contracts buy time but don't prevent eventual compression",
+        "weight": 0.15
+      }
+    }
+  }
+}
