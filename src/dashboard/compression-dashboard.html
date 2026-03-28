@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RANGE // COMPRESSION DETECTOR</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg-void: #030508;
+    --bg-panel: #060a10;
+    --bg-surface: #0a0f18;
+    --bg-inset: #040710;
+    --border-hard: #0f1a2a;
+    --border-active: #1a2840;
+    --text-primary: #c8d0e0;
+    --text-secondary: #4a5578;
+    --text-dim: #232d44;
+    --text-bright: #e8ecf4;
+    --noah: #00d4aa;
+    --noah-dim: #00d4aa30;
+    --noah-faint: #00d4aa0a;
+    --danger: #ff3b5c;
+    --danger-dim: #ff3b5c30;
+    --warning: #e8920a;
+    --warning-dim: #e8920a30;
+    --safe: #00d4aa;
+    --safe-dim: #00d4aa30;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg-void);
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .mono { font-family: 'Share Tech Mono', monospace; }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-hard);
+    background: var(--bg-panel);
+  }
+  .header-title {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    color: var(--text-secondary);
+  }
+  .header-title span { color: var(--noah); }
+  .header-meta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .status-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse 2s infinite;
+  }
+  .status-dot.live { background: var(--noah); }
+  .status-dot.waiting { background: var(--warning); }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Grid Layout */
+  .grid {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    grid-template-rows: auto 1fr;
+    gap: 1px;
+    background: var(--border-hard);
+    min-height: calc(100vh - 53px);
+  }
+
+  .panel {
+    background: var(--bg-panel);
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-hard);
+  }
+
+  /* Market Score Gauge */
+  .gauge-container {
+    text-align: center;
+    padding: 20px 0;
+  }
+  .gauge-ring {
+    width: 200px; height: 200px;
+    margin: 0 auto 16px;
+    position: relative;
+  }
+  .gauge-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .gauge-bg { fill: none; stroke: var(--border-active); stroke-width: 8; }
+  .gauge-fill { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1.5s ease, stroke 0.5s ease; }
+  .gauge-value {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 48px;
+    font-weight: 700;
+  }
+  .gauge-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+
+  /* Drivers */
+  .driver-list { list-style: none; margin-top: 16px; }
+  .driver-list li {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--text-primary);
+    padding: 6px 10px;
+    margin-bottom: 4px;
+    background: var(--bg-surface);
+    border-left: 2px solid var(--warning);
+    border-radius: 2px;
+  }
+
+  /* Model Metrics */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .metric-box {
+    background: var(--bg-surface);
+    padding: 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border-hard);
+  }
+  .metric-label {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+  }
+  .metric-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 20px;
+    color: var(--noah);
+  }
+
+  /* Stock Rankings Table */
+  .rankings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .rankings-table th {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border-active);
+    position: sticky;
+    top: 0;
+    background: var(--bg-panel);
+    z-index: 1;
+  }
+  .rankings-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-hard);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+  }
+  .rankings-table tr:hover {
+    background: var(--bg-surface);
+  }
+
+  .risk-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .risk-critical { background: var(--danger-dim); color: var(--danger); }
+  .risk-elevated { background: var(--warning-dim); color: var(--warning); }
+  .risk-moderate { background: var(--noah-dim); color: var(--noah); }
+  .risk-low { color: var(--text-secondary); }
+
+  .risk-bar-container {
+    width: 80px; height: 6px;
+    background: var(--bg-inset);
+    border-radius: 3px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  .risk-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.8s ease;
+  }
+
+  .risk-factors-cell {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    color: var(--text-secondary);
+    max-width: 250px;
+  }
+
+  .sector-tag {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: var(--bg-surface);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+
+  /* Loading state */
+  .loading-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+  }
+  .loading-state .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border-active);
+    border-top-color: var(--noah);
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .credit {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-align: center;
+    padding: 8px;
+    letter-spacing: 1px;
+  }
+  .credit span { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">RANGE // <span>COMPRESSION DETECTOR</span></div>
+  <div class="header-meta">
+    <span class="status-dot waiting" id="statusDot"></span>
+    <span id="statusText">AWAITING DATA</span>
+    &nbsp;&nbsp;|&nbsp;&nbsp;
+    <span id="timestamp">--</span>
+  </div>
+</div>
+
+<div class="grid">
+  <!-- Left: Market Score + Model Metrics -->
+  <div class="panel" style="grid-row: 1 / 3;">
+    <div class="panel-title">MARKET COMPRESSION RISK</div>
+
+    <div class="gauge-container">
+      <div class="gauge-ring">
+        <svg viewBox="0 0 200 200">
+          <circle class="gauge-bg" cx="100" cy="100" r="85" />
+          <circle class="gauge-fill" id="gaugeFill" cx="100" cy="100" r="85"
+            stroke-dasharray="534" stroke-dashoffset="534" />
+        </svg>
+        <div class="gauge-value" id="gaugeValue">--</div>
+      </div>
+      <div class="gauge-label" id="gaugeLabel" style="color: var(--text-secondary);">LOADING</div>
+    </div>
+
+    <div class="panel-title" style="margin-top: 24px;">TOP DRIVERS</div>
+    <ul class="driver-list" id="driverList">
+      <li>Waiting for model output...</li>
+    </ul>
+
+    <div class="panel-title" style="margin-top: 24px;">MODEL PERFORMANCE</div>
+    <div class="metrics-grid">
+      <div class="metric-box">
+        <div class="metric-label">PRECISION</div>
+        <div class="metric-value" id="metricPrecision">--</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">RECALL</div>
+        <div class="metric-value" id="metricRecall">--</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">F1 SCORE</div>
+        <div class="metric-value" id="metricF1">--</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-label">P@TOP 10%</div>
+        <div class="metric-value" id="metricPTop">--</div>
+      </div>
+    </div>
+
+    <div class="panel-title" style="margin-top: 24px;">TOP FEATURES</div>
+    <ul class="driver-list" id="featureList">
+      <li>Waiting for model training...</li>
+    </ul>
+
+    <div class="credit" style="margin-top: 24px;">
+      DATA: <span>OPENCLAW</span> &nbsp;|&nbsp; MODEL: <span>CLAUDE CODE</span>
+    </div>
+  </div>
+
+  <!-- Right: Stock Rankings -->
+  <div class="panel" style="grid-column: 2; grid-row: 1 / 3; padding: 0;">
+    <div style="padding: 20px 20px 0;">
+      <div class="panel-title">STOCK COMPRESSION RANKINGS</div>
+    </div>
+
+    <div id="rankingsContainer">
+      <div class="loading-state" id="loadingState">
+        <div class="spinner"></div>
+        <div style="font-size: 13px; letter-spacing: 1px;">COLLECTING DATA & TRAINING MODEL</div>
+        <div style="font-size: 11px; margin-top: 8px; color: var(--text-dim);">
+          Pipeline: Ingest → Label → Features → Train → Score → Rank
+        </div>
+      </div>
+
+      <table class="rankings-table" id="rankingsTable" style="display: none;">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>TICKER</th>
+            <th>RISK SCORE</th>
+            <th>P/E</th>
+            <th>EV/EBITDA</th>
+            <th>3MO MOM</th>
+            <th>SECTOR</th>
+            <th>TOP RISK FACTORS</th>
+          </tr>
+        </thead>
+        <tbody id="rankingsBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// Path to the output JSON (relative to dashboard location)
+const DATA_PATH = '../rangers/noah/compression/output/compression_rankings.json';
+const REPORT_PATH = '../rangers/noah/compression/output/model_report.json';
+
+function getRiskColor(score) {
+  if (score >= 75) return 'var(--danger)';
+  if (score >= 50) return 'var(--warning)';
+  if (score >= 25) return 'var(--noah)';
+  return 'var(--text-secondary)';
+}
+
+function getRiskClass(score) {
+  if (score >= 75) return 'risk-critical';
+  if (score >= 50) return 'risk-elevated';
+  if (score >= 25) return 'risk-moderate';
+  return 'risk-low';
+}
+
+function updateGauge(score, label) {
+  const fill = document.getElementById('gaugeFill');
+  const circumference = 534;
+  const offset = circumference - (score / 100) * circumference;
+  fill.style.strokeDashoffset = offset;
+  fill.style.stroke = getRiskColor(score);
+
+  document.getElementById('gaugeValue').textContent = score;
+  document.getElementById('gaugeValue').style.color = getRiskColor(score);
+
+  const labelEl = document.getElementById('gaugeLabel');
+  labelEl.textContent = label.toUpperCase();
+  labelEl.style.color = getRiskColor(score);
+}
+
+function updateDrivers(drivers) {
+  const list = document.getElementById('driverList');
+  list.innerHTML = drivers.map(d =>
+    `<li>${d}</li>`
+  ).join('');
+}
+
+function updateMetrics(metrics) {
+  const fmt = (v) => v != null ? (v * 100).toFixed(1) + '%' : '--';
+  document.getElementById('metricPrecision').textContent = fmt(metrics.avg_precision);
+  document.getElementById('metricRecall').textContent = fmt(metrics.avg_recall);
+  document.getElementById('metricF1').textContent = fmt(metrics.avg_f1);
+  document.getElementById('metricPTop').textContent = fmt(metrics.avg_precision_top_decile);
+}
+
+function updateFeatures(importances) {
+  const list = document.getElementById('featureList');
+  if (!importances || Object.keys(importances).length === 0) {
+    list.innerHTML = '<li>No feature data</li>';
+    return;
+  }
+  const sorted = Object.entries(importances)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+  list.innerHTML = sorted.map(([name, val]) =>
+    `<li>${name}: ${(val * 100).toFixed(1)}%</li>`
+  ).join('');
+}
+
+function updateRankings(stocks) {
+  document.getElementById('loadingState').style.display = 'none';
+  const table = document.getElementById('rankingsTable');
+  table.style.display = 'table';
+
+  const body = document.getElementById('rankingsBody');
+  body.innerHTML = stocks.map((s, i) => {
+    const riskColor = getRiskColor(s.compression_risk);
+    const riskClass = getRiskClass(s.compression_risk);
+    const pe = s.current_pe != null ? s.current_pe.toFixed(1) : '—';
+    const ev = s.ev_ebitda != null ? s.ev_ebitda.toFixed(1) : '—';
+    const mom = s.price_momentum_3mo != null ? (s.price_momentum_3mo > 0 ? '+' : '') + s.price_momentum_3mo.toFixed(1) + '%' : '—';
+    const factors = (s.risk_factors || []).join(' · ');
+
+    return `<tr>
+      <td style="color: var(--text-dim);">${i + 1}</td>
+      <td style="color: var(--text-bright); font-weight: 600;">${s.ticker}</td>
+      <td>
+        <div class="risk-bar-container">
+          <div class="risk-bar" style="width: ${s.compression_risk}%; background: ${riskColor};"></div>
+        </div>
+        <span class="risk-badge ${riskClass}">${s.compression_risk}</span>
+      </td>
+      <td>${pe}</td>
+      <td>${ev}</td>
+      <td style="color: ${s.price_momentum_3mo > 0 ? 'var(--noah)' : s.price_momentum_3mo < -10 ? 'var(--danger)' : 'var(--text-primary)'};">${mom}</td>
+      <td><span class="sector-tag">${s.sector || '—'}</span></td>
+      <td class="risk-factors-cell">${factors}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadData() {
+  try {
+    const resp = await fetch(DATA_PATH);
+    if (!resp.ok) throw new Error('No data yet');
+    const data = await resp.json();
+
+    // Update status
+    document.getElementById('statusDot').className = 'status-dot live';
+    document.getElementById('statusText').textContent = 'LIVE';
+    document.getElementById('timestamp').textContent = data.generated_at || new Date().toISOString();
+
+    // Market score
+    if (data.market_score) {
+      updateGauge(data.market_score.compression_risk, data.market_score.label);
+      updateDrivers(data.market_score.top_drivers || []);
+    }
+
+    // Model metrics
+    if (data.model_metrics) {
+      updateMetrics(data.model_metrics);
+    }
+
+    // Rankings
+    if (data.stock_rankings && data.stock_rankings.length > 0) {
+      updateRankings(data.stock_rankings);
+    }
+
+    // Try to load model report for feature importances
+    try {
+      const reportResp = await fetch(REPORT_PATH);
+      if (reportResp.ok) {
+        const report = await reportResp.json();
+        if (report.feature_importances) {
+          updateFeatures(report.feature_importances);
+        }
+      }
+    } catch (e) { /* ok */ }
+
+  } catch (e) {
+    console.log('Data not ready yet, retrying...', e.message);
+  }
+}
+
+// Poll every 5 seconds for data
+loadData();
+setInterval(loadData, 5000);
+</script>
+</body>
+</html>

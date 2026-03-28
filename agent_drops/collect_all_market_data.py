@@ -1,7 +1,7 @@
 """
 Market & Economic Training Data Collector
 ==========================================
-Drop this in: C:\Users\noahj\OneDrive\Desktop\Claude\Range\agent_drops\
+Drop this in: agent_drops/ within the Range project
 Run it and it creates agent_drops/data/ with everything.
 
 Sources: Kalshi (prediction markets), Yahoo Finance (stocks), FRED (macro), CoinGecko (crypto)
@@ -81,7 +81,7 @@ def safe_name(ticker):
 
 # ── 1. Kalshi Prediction Markets ───────────────────────────────────────
 def collect_kalshi():
-    print("\n📊 KALSHI — Prediction Markets")
+    print("\n[KALSHI] Prediction Markets")
     for status in ["open", "settled"]:
         print(f"  Fetching {status} markets...")
         page = 1
@@ -95,30 +95,30 @@ def collect_kalshi():
                 fname = f"markets_{status}_p{page}.json"
                 save_json(data, os.path.join(KALSHI_DIR, fname))
                 count = len(data.get("markets", []))
-                print(f"    ✓ {fname} ({count} markets)")
+                print(f"    + {fname} ({count} markets)")
                 cursor = data.get("cursor")
                 if not cursor or count == 0:
                     break
                 page += 1
                 time.sleep(0.5)
             except Exception as e:
-                print(f"    ✗ {status} page {page}: {e}")
+                print(f"    x {status} page {page}: {e}")
                 break
 
     print("  Fetching events...")
     try:
         data = fetch_json(f"{KALSHI_BASE}/events", {"limit": 200, "status": "open"})
         save_json(data, os.path.join(KALSHI_DIR, "events_open.json"))
-        print(f"    ✓ events_open.json ({len(data.get('events', []))} events)")
+        print(f"    + events_open.json ({len(data.get('events', []))} events)")
     except Exception as e:
-        print(f"    ✗ events: {e}")
+        print(f"    x events: {e}")
 
 
 # ── 2. Stock Market Data ───────────────────────────────────────────────
 def collect_stocks():
     import yfinance as yf
 
-    print("\n📈 STOCKS — 5yr Daily (70 tickers)")
+    print("\n[STOCKS] 5yr Daily (70 tickers)")
 
     # Bulk download
     print("  Bulk downloading all tickers...")
@@ -126,9 +126,9 @@ def collect_stocks():
         data = yf.download(ALL_TICKERS, period="5y", interval="1d",
                           group_by="ticker", threads=True)
         data.to_csv(os.path.join(STOCKS_DIR, "all_tickers_5y_daily.csv"))
-        print(f"    ✓ all_tickers_5y_daily.csv ({data.shape[0]} rows x {data.shape[1]} cols)")
+        print(f"    + all_tickers_5y_daily.csv ({data.shape[0]} rows x {data.shape[1]} cols)")
     except Exception as e:
-        print(f"    ✗ bulk download: {e}")
+        print(f"    x bulk download: {e}")
 
     # Individual tickers
     print("  Downloading individual histories...")
@@ -137,9 +137,9 @@ def collect_stocks():
             t = yf.Ticker(ticker)
             hist = t.history(period="5y")
             hist.to_csv(os.path.join(STOCKS_DIR, f"{safe_name(ticker)}_5y.csv"))
-            print(f"    ✓ {ticker} ({len(hist)} rows)")
+            print(f"    + {ticker} ({len(hist)} rows)")
         except Exception as e:
-            print(f"    ✗ {ticker}: {e}")
+            print(f"    x {ticker}: {e}")
 
     # Fundamentals
     print("  Fetching fundamentals...")
@@ -172,15 +172,15 @@ def collect_stocks():
                 "earningsGrowth": info.get("earningsGrowth"),
                 "revenueGrowth": info.get("revenueGrowth"),
             })
-            print(f"    ✓ {ticker} fundamentals")
+            print(f"    + {ticker} fundamentals")
         except Exception as e:
-            print(f"    ✗ {ticker}: {e}")
+            print(f"    x {ticker}: {e}")
     save_json(fundamentals, os.path.join(STOCKS_DIR, "fundamentals_top50.json"))
 
 
 # ── 3. FRED Economic Data ─────────────────────────────────────────────
 def collect_fred():
-    print("\n🏛️  FRED — 25 Macroeconomic Series")
+    print("\n[FRED] 25 Macroeconomic Series")
     for name, series_id in FRED_SERIES.items():
         try:
             url = f"https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}"
@@ -190,15 +190,15 @@ def collect_fred():
             with open(path, "wb") as f:
                 f.write(r.content)
             rows = r.text.count("\n") - 1
-            print(f"  ✓ {name} ({rows} rows)")
+            print(f"  + {name} ({rows} rows)")
             time.sleep(0.4)
         except Exception as e:
-            print(f"  ✗ {name}: {e}")
+            print(f"  x {name}: {e}")
 
 
 # ── 4. Crypto ──────────────────────────────────────────────────────────
 def collect_crypto():
-    print("\n🪙 CRYPTO — Daily prices (1yr)")
+    print("\n[CRYPTO] Daily prices (1yr)")
     for coin in CRYPTO_COINS:
         try:
             data = fetch_json(
@@ -207,10 +207,10 @@ def collect_crypto():
             )
             save_json(data, os.path.join(CRYPTO_DIR, f"{coin}_1y.json"))
             days = len(data.get("prices", []))
-            print(f"  ✓ {coin} ({days} days)")
+            print(f"  + {coin} ({days} days)")
             time.sleep(2)
         except Exception as e:
-            print(f"  ✗ {coin}: {e}")
+            print(f"  x {coin}: {e}")
 
 
 # ── 5. Write README ───────────────────────────────────────────────────

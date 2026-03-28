@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RANGE // TACTICAL OPS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg-void: #030508;
+    --bg-panel: #060a10;
+    --bg-surface: #0a0f18;
+    --bg-inset: #040710;
+    --border-hard: #0f1a2a;
+    --border-active: #1a2840;
+    --text-primary: #c8d0e0;
+    --text-secondary: #4a5578;
+    --text-dim: #232d44;
+    --text-bright: #e8ecf4;
+
+    --noah: #00d4aa;
+    --noah-dim: #00d4aa30;
+    --noah-faint: #00d4aa0a;
+
+    --chase: #e8920a;
+    --chase-dim: #e8920a30;
+    --chase-faint: #e8920a0a;
+
+    --josh: #c040e0;
+    --josh-dim: #c040e030;
+    --josh-faint: #c040e00a;
+
+    --red: #e03040;
+    --red-dim: #e0304030;
+    --green: #00d4aa;
+    --amber: #e8920a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Share Tech Mono', monospace;
+    background: var(--bg-void);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Tactical grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(#0a1525 1px, transparent 1px),
+      linear-gradient(90deg, #0a1525 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.4;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Noise grain */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.035;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* ---- TOP BAR ---- */
+  .topbar {
+    display: flex;
+    align-items: stretch;
+    height: 48px;
+    border-bottom: 1px solid var(--border-hard);
+    background: var(--bg-panel);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    border-right: 1px solid var(--border-hard);
+    gap: 10px;
+    min-width: 200px;
+  }
+
+  .brand-mark {
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--noah);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--noah);
+    position: relative;
+  }
+
+  .brand-mark::before,
+  .brand-mark::after {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-color: var(--noah);
+  }
+  .brand-mark::before { top: -2px; left: -2px; border-top: 1px solid; border-left: 1px solid; }
+  .brand-mark::after { bottom: -2px; right: -2px; border-bottom: 1px solid; border-right: 1px solid; }
+
+  .brand-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 5px;
+    color: var(--text-bright);
+  }
+
+  .brand-sub {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-left: 8px;
+  }
+
+  .topbar-ops {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    padding: 0 16px;
+    gap: 24px;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+  }
+
+  .ops-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ops-indicator {
+    width: 5px;
+    height: 5px;
+    background: var(--green);
+    animation: pulse-ind 2.5s ease-in-out infinite;
+  }
+
+  .ops-indicator.amber { background: var(--amber); }
+  .ops-indicator.red { background: var(--red); }
+
+  @keyframes pulse-ind {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .ops-value { color: var(--text-primary); }
+
+  .topbar-clock {
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    border-left: 1px solid var(--border-hard);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: var(--noah);
+    min-width: 120px;
+    justify-content: center;
+  }
+
+  /* ---- OPERATOR TABS ---- */
+  .op-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-hard);
+    background: var(--bg-void);
+  }
+
+  .op-tab {
+    padding: 10px 20px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s;
+    position: relative;
+    user-select: none;
+  }
+
+  .op-tab:hover { color: var(--text-secondary); }
+
+  .op-tab.active { color: var(--text-primary); border-bottom-color: var(--text-primary); }
+  .op-tab.active[data-ranger="noah"] { color: var(--noah); border-bottom-color: var(--noah); }
+  .op-tab.active[data-ranger="chase"] { color: var(--chase); border-bottom-color: var(--chase); }
+  .op-tab.active[data-ranger="josh"] { color: var(--josh); border-bottom-color: var(--josh); }
+
+  .op-tab .callsign {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 8px;
+  }
+
+  .op-tab[data-ranger="noah"] .callsign { background: var(--noah); }
+  .op-tab[data-ranger="chase"] .callsign { background: var(--chase); }
+  .op-tab[data-ranger="josh"] .callsign { background: var(--josh); }
+
+  /* ---- MAIN ---- */
+  .main {
+    padding: 16px;
+    max-width: 1480px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 12px;
+  }
+
+  /* ---- PANEL (widget) ---- */
+  .panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-hard);
+    position: relative;
+    overflow: hidden;
+    animation: panel-boot 0.6s ease backwards;
+  }
+
+  .panel::before,
+  .panel::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    z-index: 2;
+  }
+
+  .panel::before { top: 0; left: 0; border-top: 1px solid var(--border-active); border-left: 1px solid var(--border-active); }
+  .panel::after { bottom: 0; right: 0; border-bottom: 1px solid var(--border-active); border-right: 1px solid var(--border-active); }
+
+  .panel:hover { border-color: var(--border-active); }
+  .panel[data-owner="noah"]:hover { border-color: var(--noah-dim); }
+  .panel[data-owner="noah"]:hover::before,
+  .panel[data-owner="noah"]:hover::after { border-color: var(--noah); }
+  .panel[data-owner="chase"]:hover { border-color: var(--chase-dim); }
+  .panel[data-owner="chase"]:hover::before,
+  .panel[data-owner="chase"]:hover::after { border-color: var(--chase); }
+  .panel[data-owner="josh"]:hover { border-color: var(--josh-dim); }
+  .panel[data-owner="josh"]:hover::before,
+  .panel[data-owner="josh"]:hover::after { border-color: var(--josh); }
+
+  @keyframes panel-boot {
+    from { opacity: 0; clip-path: inset(0 0 100% 0); }
+    to { opacity: 1; clip-path: inset(0 0 0 0); }
+  }
+
+  .panel:nth-child(1) { animation-delay: 0.05s; }
+  .panel:nth-child(2) { animation-delay: 0.12s; }
+  .panel:nth-child(3) { animation-delay: 0.19s; }
+  .panel:nth-child(4) { animation-delay: 0.26s; }
+  .panel:nth-child(5) { animation-delay: 0.33s; }
+  .panel:nth-child(6) { animation-delay: 0.40s; }
+  .panel:nth-child(7) { animation-delay: 0.47s; }
+  .panel:nth-child(8) { animation-delay: 0.54s; }
+  .panel:nth-child(9) { animation-delay: 0.61s; }
+
+  .panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border-hard);
+    background: var(--bg-surface);
+  }
+
+  .panel-label {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .panel-label .marker {
+    width: 3px;
+    height: 12px;
+  }
+
+  .panel[data-owner="noah"] .marker { background: var(--noah); }
+  .panel[data-owner="chase"] .marker { background: var(--chase); }
+  .panel[data-owner="josh"] .marker { background: var(--josh); }
+
+  .panel-tag {
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border: 1px solid var(--border-hard);
+    color: var(--text-dim);
+  }
+
+  .panel[data-owner="noah"] .panel-tag { color: var(--noah); border-color: var(--noah-dim); }
+  .panel[data-owner="chase"] .panel-tag { color: var(--chase); border-color: var(--chase-dim); }
+  .panel[data-owner="josh"] .panel-tag { color: var(--josh); border-color: var(--josh-dim); }
+
+  .panel-body {
+    padding: 14px;
+    min-height: 140px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+  }
+
+  /* accent colors per owner */
+  .panel[data-owner="noah"] .val-accent { color: var(--noah); }
+  .panel[data-owner="chase"] .val-accent { color: var(--chase); }
+  .panel[data-owner="josh"] .val-accent { color: var(--josh); }
+
+  /* ---- STOCK READOUT ---- */
+  .ticker-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .ticker-table tr { border-bottom: 1px solid #0a1020; }
+  .ticker-table tr:last-child { border-bottom: none; }
+
+  .ticker-table td {
+    padding: 8px 4px;
+    font-size: 11px;
+  }
+
+  .ticker-sym {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-bright);
+    letter-spacing: 1px;
+  }
+
+  .ticker-sector { font-size: 9px; color: var(--text-dim); letter-spacing: 1px; }
+
+  .val-up { color: var(--green); }
+  .val-down { color: var(--red); }
+  .val-neutral { color: var(--text-secondary); }
+
+  .delta {
+    display: inline-block;
+    padding: 1px 5px;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+  }
+  .delta-up { background: #00d4aa10; border: 1px solid #00d4aa20; color: var(--green); }
+  .delta-down { background: #e0304010; border: 1px solid #e0304020; color: var(--red); }
+
+  /* ---- MONITOR BARS ---- */
+  .sys-row {
+    display: flex;
+    align-items: center;
+    padding: 7px 0;
+    gap: 10px;
+    border-bottom: 1px solid #060c18;
+  }
+  .sys-row:last-child { border-bottom: none; }
+
+  .sys-label {
+    width: 48px;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  .sys-bar-track {
+    flex: 1;
+    height: 4px;
+    background: var(--bg-inset);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sys-bar-fill {
+    height: 100%;
+    transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+  }
+
+  .sys-bar-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -2px;
+    width: 1px;
+    height: 8px;
+    background: inherit;
+    opacity: 0.8;
+  }
+
+  .sys-val {
+    width: 36px;
+    text-align: right;
+    font-size: 11px;
+    color: var(--text-primary);
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+  }
+
+  .sys-status {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    width: 50px;
+    text-align: right;
+  }
+
+  /* ---- WEATHER READOUT ---- */
+  .wx-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px 20px;
+    align-items: start;
+  }
+
+  .wx-temp {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 56px;
+    font-weight: 700;
+    line-height: 1;
+    grid-row: span 2;
+  }
+
+  .wx-condition {
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    padding-top: 8px;
+  }
+
+  .wx-details {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 14px;
+    grid-column: span 2;
+  }
+
+  .wx-stat {
+    background: var(--bg-inset);
+    border: 1px solid #0a1020;
+    padding: 8px 10px;
+  }
+
+  .wx-stat-label {
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  .wx-stat-val {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-primary);
+  }
+
+  /* ---- TASK LIST ---- */
+  .task-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #060c18;
+  }
+  .task-row:last-child { border-bottom: none; }
+
+  .task-indicator {
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--border-active);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: transparent;
+    flex-shrink: 0;
+  }
+
+  .task-indicator.complete {
+    border-color: var(--green);
+    color: var(--green);
+    background: #00d4aa0a;
+  }
+
+  .task-label { flex: 1; font-size: 11px; }
+  .task-label.complete { color: var(--text-dim); text-decoration: line-through; }
+
+  .task-pri {
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    padding: 2px 5px;
+    text-transform: uppercase;
+  }
+
+  .pri-crit { color: var(--red); border: 1px solid var(--red-dim); background: #e0304008; }
+  .pri-warn { color: var(--amber); border: 1px solid var(--chase-dim); background: #e8920a08; }
+  .pri-norm { color: var(--text-dim); border: 1px solid var(--border-hard); }
+
+  /* ---- CRYPTO ---- */
+  .asset-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 0;
+    border-bottom: 1px solid #060c18;
+  }
+  .asset-row:last-child { border-bottom: none; }
+
+  .asset-id {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text-bright);
+    letter-spacing: 1px;
+  }
+
+  .asset-pair { font-size: 9px; color: var(--text-dim); letter-spacing: 1px; }
+
+  .asset-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 1px;
+    height: 24px;
+    margin: 0 12px;
+  }
+
+  .chart-bar {
+    width: 3px;
+    min-height: 2px;
+    transition: height 0.4s ease;
+  }
+
+  /* ---- FEED ---- */
+  .log-entry {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid #060c18;
+    font-size: 10px;
+  }
+  .log-entry:last-child { border-bottom: none; }
+
+  .log-ts {
+    color: var(--text-dim);
+    font-size: 9px;
+    letter-spacing: 0.5px;
+    min-width: 56px;
+    flex-shrink: 0;
+  }
+
+  .log-src {
+    width: 3px;
+    min-height: 100%;
+    flex-shrink: 0;
+  }
+
+  .log-msg { color: var(--text-secondary); line-height: 1.5; }
+  .log-msg strong { color: var(--text-primary); font-weight: 500; }
+  .log-msg code {
+    font-family: inherit;
+    color: var(--text-dim);
+    background: var(--bg-inset);
+    padding: 1px 4px;
+  }
+
+  /* ---- COMMS (notes) ---- */
+  .comms-input {
+    width: 100%;
+    min-height: 90px;
+    background: var(--bg-inset);
+    border: 1px solid var(--border-hard);
+    padding: 10px 12px;
+    color: var(--text-primary);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+  }
+  .comms-input:focus { border-color: var(--border-active); }
+  .comms-input::placeholder { color: var(--text-dim); }
+
+  /* ---- UPTIME ---- */
+  .uptime-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 32px;
+    margin-bottom: 14px;
+  }
+
+  .up-bar {
+    flex: 1;
+    min-height: 2px;
+    transition: height 0.5s ease;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid #060c18;
+    padding-top: 12px;
+  }
+
+  .stat-block {}
+  .stat-label {
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 4px;
+  }
+
+  .stat-val {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--text-primary);
+  }
+
+  /* ---- THREAT LEVEL ---- */
+  .threat-panel .panel-body { padding: 14px; }
+
+  .threat-level {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 14px;
+  }
+
+  .threat-seg {
+    flex: 1;
+    height: 6px;
+    background: var(--bg-inset);
+    position: relative;
+  }
+
+  .threat-seg.active-green { background: var(--green); opacity: 0.8; }
+  .threat-seg.active-amber { background: var(--amber); opacity: 0.6; }
+
+  .threat-readout {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .threat-status {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  .threat-meta { text-align: right; }
+  .threat-meta div { font-size: 9px; letter-spacing: 1px; color: var(--text-dim); }
+  .threat-meta .val { color: var(--text-secondary); }
+
+  .hidden { display: none !important; }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 768px) {
+    .grid { grid-template-columns: 1fr; }
+    .op-tabs { overflow-x: auto; }
+    .topbar { flex-wrap: wrap; height: auto; }
+    .topbar-ops { flex-wrap: wrap; padding: 8px 16px; }
+    .wx-details { grid-template-columns: 1fr 1fr; }
+    .stock-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-mark">R</div>
+    <span class="brand-text">RANGE</span>
+    <span class="brand-sub">TACTICAL OPS</span>
+  </div>
+  <div class="topbar-ops">
+    <div class="ops-item">
+      <div class="ops-indicator"></div>
+      <span>SYSTEMS</span>
+      <span class="ops-value">NOMINAL</span>
+    </div>
+    <div class="ops-item">
+      <div class="ops-indicator"></div>
+      <span>OPERATORS</span>
+      <span class="ops-value">3 ACTIVE</span>
+    </div>
+    <div class="ops-item">
+      <div class="ops-indicator amber"></div>
+      <span>THREAT</span>
+      <span class="ops-value">LOW</span>
+    </div>
+    <div class="ops-item">
+      <span>UPLINK</span>
+      <span class="ops-value">STABLE</span>
+    </div>
+  </div>
+  <div class="topbar-clock" id="clock">00:00:00</div>
+</div>
+
+<!-- OPERATOR TABS -->
+<nav class="op-tabs">
+  <div class="op-tab active" data-ranger="all" onclick="filterPanels('all')">ALL OPS</div>
+  <div class="op-tab" data-ranger="noah" onclick="filterPanels('noah')"><span class="callsign"></span>NOAH</div>
+  <div class="op-tab" data-ranger="chase" onclick="filterPanels('chase')"><span class="callsign"></span>CHASE</div>
+  <div class="op-tab" data-ranger="josh" onclick="filterPanels('josh')"><span class="callsign"></span>JOSH</div>
+</nav>
+
+<main class="main">
+  <div class="grid" id="panel-grid">
+
+    <!-- THREAT ASSESSMENT -->
+    <div class="panel threat-panel" data-owner="noah">
+      <div class="panel-head">
+        <div class="panel-label"><div class="marker"></div>THREAT ASSESSMENT</div>
+        <div class="panel-tag">NOAH</div>
+      </div>
+      <div class="panel-body">
+        <div class="threat-level">
+          <div class="threat-seg active-green"></div>
+          <div class="threat-seg active-green"></div>
+          <div class="threat-seg active-green"></div>
+          <div class="threat-seg active-amber"></div>
+          <div class="threat-seg"></div>
+          <div class="threat-seg"></div>
+          <div class="threat-seg"></div>
+          <div class="threat-seg"></div>
+          <div class="threat-seg"></div>
+          <div class="threat-seg"></div>
+        </div>
+        <div class="threat-readout">
+          <div class="threat-status val-accent">DEFCON 4</div>
+          <div class="threat-meta">
+            <div>LAST SCAN <span class="val">00:32 AGO</span></div>
+            <div>VECTORS <span class="val">0 DETECTED</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STOCK READOUT -->
+    <div class="panel" data-owner="noah">
+      <div class="panel-head">
+        <div class="panel-label"><div class="marker"></div>MARKET INTEL</div>
+        <div class="panel-tag">NOAH</div>
+      </div>
+      <div class="panel-body">
+        <table class="ticker-table">
+          <tr>
+            <td><div class="ticker-sym">AAPL</div><div class="ticker-sector">TECH</div></td>
+            <td style="text-align:right"><div class="val-up">198.42</div></td>
+            <td style="text-align:right"><span class="delta delta-up">+1.24%</span></td>
+          </tr>
+          <tr>
+            <td><div class="ticker-sym">TSLA</div><div class="ticker-sector">AUTO</div></td>
+            <td style="text-align:right"><div class="val-down">241.37</div></td>
+            <td style="text-align:right"><span class="delta delta-down">-2.18%</span></td>
+          </tr>
+          <tr>
+            <td><div class="ticker-sym">NVDA</div><div class="ticker-sector">SEMI</div></td>
+            <td style="text-align:right"><div class="val-up">892.15</div></td>
+            <td style="text-align:right"><span class="delta delta-up">+3.67%</span></td>
+          </tr>
+          <tr>
+            <td><div class="ticker-sym">MSFT</div><div class="ticker-sector">TECH</div></td>
+            <td style="text-align:right"><div class="val-up">421.80</div></td>
+            <td style="text-align:right"><span class="delta delta-up">+0.45%</span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- WEATHER -->
+    <div class="panel" data-owner="chase">
+      <div class="panel-head">
+        <div class="panel-label"><div class="marker"></div>WX REPORT</div>
+        <div class="panel-tag">CHASE</div>
+      </div>
+      <div class="panel-body">
+        <div class="wx-grid">
+          <div class="wx-temp val-accent">72<span style="font-size:24px;color:var(--text-dim)">&deg;F</span></div>
+          <div>
+            <div class="wx-condition">PARTLY CLOUDY // OVERCAST AT 12K FT</div>
+            <div style="font-size:9px;color:var(--text-dim);margin-top:4px;letter-spacing:1px;">AO: DALLAS/FT WORTH</div>
+          </div>
+          <div class="wx-details">
+            <div class="wx-stat">
+              <div class="wx-stat-label">WIND</div>
+              <div class="wx-stat-val">8 <span style="font-size:10px;color:var(--text-dim)">MPH NW</span></div>
+            </div>
+            <div class="wx-stat">
+              <div class="wx-stat-label">HUMIDITY</div>
+              <div class="wx-stat-val">45<span style="font-size:10px;color:var(--text-dim)">%</span></div>
+            </div>
+            <div class="wx-stat">
+              <div class="wx-stat-label">VISIBILITY</div>
+              <div class="wx-stat-val">10 <span style="font-size:10px;color:var(--text-dim)">MI</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TASK LIST -->
+    <div class="panel" data-owner="josh">
+      <div class="panel-head">
+        <div class="panel-label"><div class="marker"></div>OPERATIONS QUEUE</div>
+        <div class="panel-tag">JOSH</div>
+      </div>
+      <div class="panel-body">
+        <div class="task-row">
+          <div class="task-indicator complete" onclick="toggleTask(this)">X</div>
+          <div class="task-label complete">Establish ranger workspaces</div>
+          <span class="task-pri pri-crit">CRIT</span>
+        </div>
+        <div class="task-row">
+          <div class="task-indicator" onclick="toggleTask(this)"></div>
+          <div class="task-label">Deploy scraper module</div>
+          <span class="task-pri pri-crit">CRIT</span>
+        </div>
+        <div class="task-row">
+          <div class="task-indicator" onclick="toggleTask(this)"></div>
+          <div class="task-label">Wire dashboard API endpoints</div>
+          <span class="task-pri pri-warn">WARN</span>
+        </div>
+        <div class="task-row">
+          <div class="task-indicator" onclick="toggleTask(this)"></div>
+          <div class="task-label">Implement auth layer</div>
+          <span class="task-pri pri-norm">NORM</span>
+        </div>
+        <div class="task-row">
+          <div class="task-indicator" onclick="toggleTask(this)"></div>
+          <div class="task-label">Configure alert thresholds</div>
+          <span class="task-pri pri-norm">NORM</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SYSTEM MONITOR -->
+    <div class="panel" data-owner="noah">
+      <div class="panel-head">
+        <div class="panel-label"><div class="marker"></div>SYSTEM TELEMETRY</div>
+        <div class="panel-tag">NOAH</div>
+      </div>
+      <div class="panel-body">
+        <div class="sys-row">
+          <div class="sys-label">CPU</div>
+          <div class="sys-bar-track"><div class="sys-bar-fill" data-width="34" style="width:0%;background:var(--noah)"></div></div>
+          <div class="sys-val">34%</div>
+          <div class="sys-status val-up">CLEAR</div>
+        </div>
+        <div class="sys-row">
+          <div class="sys-label">MEM</div>
+          <div class="sys-bar-track"><div class="sys-bar-fill" data-width="68" style="width:0%;background:var(--amber)"></div></div>
+          <div class="sys-val">68%</div>
+          <div class="sys-status" style="color:var(--amber)">ELEVATED</div>
+        </div>
+        <div class="sys-row">
+          <div class="sys-label">DISK</div>
+          <div class="sys-bar-track"><div class="sys-bar-fill" data-width="52" style="width:0%;background:var(--noah)"></div></div>
+          <div class="sys-val">52%</div>
+          <div class="sys-status val-up">CLEAR</div>
+        </div>
+        <div class="sys-row">
+          <div class="sys-label">NET</div>
+          <div class="sys-bar-track"><div class="sys-bar-fill" data-width="12" style="width:0%;background:var(--green)"></div></div>
+          <div class="sys-val">12%</div>
+          <div class="sys-status val-up">CLEAR</div>
+        </div>
+        <div class="sys-row">
+          <div class="sys-label">GPU</div>
+          <div class="sys-bar-track"><div class="sys-bar-fill" data-width="7" style="width:0%;background:var(--green)"></div></div>
+          <div class="sys-val">7%</div>
+          <div class="sys-status val-up">IDLE</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CRYPTO -->
+    <div class="panel" data-owner="chase">
+      <div class="panel-head">
+        <div class="panel-label"><div class="marker"></div>DIGITAL ASSETS</div>
+        <div class="panel-tag">CHASE</div>
+      </div>
+      <div class="panel-body">
+        <div class="asset-row">
+          <div><div class="asset-id">BTC</div><div class="asset-pair">BTC/USD</div></div>
+          <div class="asset-chart" data-asset="btc"></div>
+          <div style="text-align:right"><div class="val-up">67,432</div><span class="delta delta-up">+2.41%</span></div>
+        </div>
+        <div class="asset-row">
+          <div><div class="asset-id">ETH</div><div class="asset-pair">ETH/USD</div></div>
+          <div class="asset-chart" data-asset="eth"></div>
+          <div style="text-align:right"><div class="val-down">3,241</div><span class="delta delta-down">-0.87%</span></div>
+        </div>
+        <div class="asset-row">
+          <div><div class="asset-id">SOL</div><div class="asset-pair">SOL/USD</div></div>
+          <div class="asset-chart" data-asset="sol"></div>
+          <div style="text-align:right"><div class="val-up">142.18</div><span class="delta delta-up">+5.12%</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTIVITY LOG -->
+    <div class="panel" data-owner="josh">
+      <div class="panel-head">
+        <div class="panel-label"><div class="marker"></div>OPERATIONS LOG</div>
+        <div class="panel-tag">JOSH</div>
+      </div>
+      <div class="panel-body">
+        <div class="log-entry">
+          <div class="log-ts">14:32:08</div>
+          <div class="log-src" style="background:var(--noah)"></div>
+          <div class="log-msg"><strong>NOAH</strong> pushed commit to <code>noah/stock-api</code></div>
+        </div>
+        <div class="log-entry">
+          <div class="log-ts">14:18:44</div>
+          <div class="log-src" style="background:var(--chase)"></div>
+          <div class="log-msg"><strong>CHASE</strong> merged PR #3 // crypto ticker widget</div>
+        </div>
+        <div class="log-entry">
+          <div class="log-ts">13:45:12</div>
+          <div class="log-src" style="background:var(--josh)"></div>
+          <div class="log-msg"><strong>JOSH</strong> deployed scraper v0.2 to staging</div>
+        </div>
+        <div class="log-entry">
+          <div class="log-ts">13:22:01</div>
+          <div class="log-src" style="background:var(--noah)"></div>
+          <div class="log-msg"><strong>NOAH</strong> updated threat assessment parameters</div>
+        </div>
+        <div class="log-entry">
+          <div class="log-ts">12:58:33</div>
+          <div class="log-src" style="background:var(--chase)"></div>
+          <div class="log-msg"><strong>CHASE</strong> initialized weather data pipeline</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMMS -->
+    <div class="panel" data-owner="noah">
+      <div class="panel-head">
+        <div class="panel-label"><div class="marker"></div>FIELD NOTES</div>
+        <div class="panel-tag">NOAH</div>
+      </div>
+      <div class="panel-body">
+        <textarea class="comms-input" placeholder="// ENTER FIELD NOTES...">// PRIORITY: wire up live market feed
+// OPTIONS: alphavantage (free tier) or polygon.io
+// NOTE: need API key rotation strategy
+// STATUS: evaluating</textarea>
+      </div>
+    </div>
+
+    <!-- UPTIME -->
+    <div class="panel" data-owner="chase">
+      <div class="panel-head">
+        <div class="panel-label"><div class="marker"></div>INFRASTRUCTURE STATUS</div>
+        <div class="panel-tag">CHASE</div>
+      </div>
+      <div class="panel-body">
+        <div class="uptime-bars" id="uptime-bars"></div>
+        <div class="stat-row">
+          <div class="stat-block">
+            <div class="stat-label">UPTIME</div>
+            <div class="stat-val val-accent">99.97%</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-label">LATENCY</div>
+            <div class="stat-val">142<span style="font-size:11px;color:var(--text-dim)">MS</span></div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-label">INCIDENTS</div>
+            <div class="stat-val" style="color:var(--green)">0</div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-label">LAST CHECK</div>
+            <div class="stat-val" style="font-size:14px" id="last-check">--:--</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  // Clock
+  function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent =
+      now.toLocaleTimeString('en-US', { hour12: false });
+    document.getElementById('last-check').textContent =
+      now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+  }
+  setInterval(updateClock, 1000);
+  updateClock();
+
+  // Tab filtering
+  function filterPanels(ranger) {
+    document.querySelectorAll('.op-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.op-tab[data-ranger="${ranger}"]`).classList.add('active');
+
+    document.querySelectorAll('.panel').forEach((p, i) => {
+      const show = ranger === 'all' || p.dataset.owner === ranger;
+      p.classList.toggle('hidden', !show);
+      if (show) {
+        p.style.animation = 'none';
+        p.offsetHeight;
+        p.style.animation = `panel-boot 0.5s ease ${i * 0.06}s backwards`;
+      }
+    });
+  }
+
+  // Task toggle
+  function toggleTask(el) {
+    el.classList.toggle('complete');
+    el.textContent = el.classList.contains('complete') ? 'X' : '';
+    el.nextElementSibling.classList.toggle('complete');
+  }
+
+  // Animate sys bars
+  setTimeout(() => {
+    document.querySelectorAll('.sys-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.width + '%';
+    });
+  }, 200);
+
+  // Build mini charts for crypto
+  document.querySelectorAll('.asset-chart').forEach(chart => {
+    const bars = 16;
+    const isUp = chart.closest('.asset-row').querySelector('.val-up');
+    const color = isUp ? 'var(--green)' : 'var(--red)';
+    for (let i = 0; i < bars; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'chart-bar';
+      const base = isUp ? 30 + (i / bars) * 40 : 70 - (i / bars) * 40;
+      const h = base + (Math.random() - 0.5) * 20;
+      bar.style.height = Math.max(4, h) + '%';
+      bar.style.background = color;
+      bar.style.opacity = 0.3 + (i / bars) * 0.7;
+      chart.appendChild(bar);
+    }
+  });
+
+  // Build uptime bars
+  (function() {
+    const el = document.getElementById('uptime-bars');
+    for (let i = 0; i < 48; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'up-bar';
+      const h = 70 + Math.random() * 30;
+      bar.style.height = h + '%';
+      bar.style.background = h < 80 ? 'var(--amber)' : 'var(--green)';
+      bar.style.opacity = 0.3 + (i / 48) * 0.7;
+      el.appendChild(bar);
+    }
+  })();
+</script>
+
+</body>
+</html>

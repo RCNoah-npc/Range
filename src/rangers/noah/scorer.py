@@ -342,7 +342,7 @@ def score_market(features_df, macro_features):
     median_val = np.median(val_scores) if val_scores else 50
 
     # Market-level momentum (SPY)
-    spy_mom = features_df[features_df.get("ticker") == "SPY"]
+    spy_mom = features_df[features_df["ticker"] == "SPY"] if "ticker" in features_df.columns else pd.DataFrame()
 
     market_score = macro_score * 0.40 + median_val * 0.35 + (np.mean(val_scores) * 0.25 if val_scores else 50)
 

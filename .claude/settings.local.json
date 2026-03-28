@@ -12,7 +12,19 @@
       "Bash(gh repo:*)",
       "Bash(git remote:*)",
       "Bash(git fetch:*)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "Bash(start:*)",
+      "Bash(bash \"C:/Users/noahj/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.5/skills/brainstorming/scripts/start-server.sh\" --project-dir \"C:/dell/dev/Range\")",
+      "Bash(for f:*)",
+      "Bash(do gh:*)",
+      "Bash(git pull:*)",
+      "Bash(PYTHONIOENCODING=utf-8 python agent_drops/collect_all_market_data.py)",
+      "Bash(tasklist //FI \"IMAGENAME eq python.exe\")",
+      "Bash(tasklist /FI \"IMAGENAME eq python.exe\")",
+      "Bash(PYTHONIOENCODING=utf-8 python -m src.rangers.noah.run)",
+      "Bash(git add:*)",
+      "Bash(powershell -Command \"Remove-Item -Force 'C:\\\\\\\\Users\\\\\\\\noahj\\\\\\\\OneDrive\\\\\\\\Desktop\\\\\\\\Claude\\\\\\\\Range\\\\\\\\.git\\\\\\\\index.lock'\")",
+      "Bash(powershell -Command \"Get-Process git -ErrorAction SilentlyContinue | Stop-Process -Force; Start-Sleep -Seconds 2; if \\(Test-Path 'C:\\\\\\\\Users\\\\\\\\noahj\\\\\\\\OneDrive\\\\\\\\Desktop\\\\\\\\Claude\\\\\\\\Range\\\\\\\\.git\\\\\\\\index.lock'\\) { Remove-Item -Force 'C:\\\\\\\\Users\\\\\\\\noahj\\\\\\\\OneDrive\\\\\\\\Desktop\\\\\\\\Claude\\\\\\\\Range\\\\\\\\.git\\\\\\\\index.lock' }\")"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  openclaw-sandbox:
+    image: openclaw/core:latest # Replace with your specific OpenClaw image
+    container_name: openclaw_isolated
+    restart: unless-stopped
+    # This mounts ONLY the drop folder. OpenClaw cannot see the rest of your repo.
+    volumes:
+      - ./_agent_drops:/app/cursor_drop_zone
+    environment:
+      - OPENCLAW_WORKSPACE=/app/cursor_drop_zone
+    # Blocks OpenClaw from accessing your local network/localhost
+    network_mode: bridge
