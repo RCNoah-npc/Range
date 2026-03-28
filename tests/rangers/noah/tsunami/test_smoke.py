@@ -27,17 +27,17 @@ class FakeCHGGAdapter:
     def get_financials(self, ticker: str) -> dict:
         return {
             "sga_pct": 0.48,
-            "gross_margin_pct": 0.50,
+            "gross_margin_pct": 0.65,
             "debt_to_equity": 2.1,
             "fcf_yield_pct": -0.03,
             "roic_pct": 0.02,
         }
 
     def get_price(self, ticker: str) -> float:
-        return 9.50
+        return 50.0
 
     def get_valuation(self, ticker: str) -> dict:
-        return {"eps": -0.80, "pe": 0.0}
+        return {"eps": 1.50, "pe": 35.0}
 
     def get_historical_prices(self, ticker: str, period: str = "2y") -> pd.DataFrame:
         np.random.seed(42)

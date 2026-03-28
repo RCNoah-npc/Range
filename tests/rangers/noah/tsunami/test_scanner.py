@@ -31,7 +31,7 @@ class FakeAdapter:
             "roic_pct": 0.03,
         }
         self.price_val = price
-        self.valuation_data = valuation or {"eps": 1.50, "pe": 25.0}
+        self.valuation_data = valuation or {"eps": 2.50, "pe": 45.0}
 
     def get_financials(self, ticker: str) -> dict:
         return self.financials_data
@@ -64,60 +64,60 @@ def test_db(tmp_path):
 
 
 class TestComputeVulnerabilityScore:
-    """Unit tests for the scoring function."""
+    """Unit tests for the compression-based scoring function."""
 
-    def test_equal_weights_high_vulnerability(self):
-        """High SGA, low margin, high debt, negative FCF, low ROIC => high score."""
+    def test_high_pe_high_sga_scores_high(self):
+        """High P/E + high SGA + high margin = high compression risk."""
         weights = config.DEFAULT_FEATURE_WEIGHTS
         financials = {
             "sga_pct": 0.50,
-            "gross_margin_pct": 0.40,
+            "gross_margin_pct": 0.75,
             "debt_to_equity": 2.0,
             "fcf_yield_pct": -0.05,
             "roic_pct": 0.02,
         }
-        score = compute_vulnerability_score(financials, weights)
+        score = compute_vulnerability_score(financials, weights, pe=45.0, eps=3.0)
         assert 0.0 <= score <= 1.0
-        assert score > 0.6, f"Expected vulnerable company score > 0.6, got {score}"
+        assert score > 0.6, f"Expected high compression risk > 0.6, got {score}"
 
-    def test_equal_weights_low_vulnerability(self):
-        """Low SGA, high margin, low debt, high FCF, high ROIC => low score."""
+    def test_low_pe_scores_low(self):
+        """Already-compressed P/E = low score regardless of other metrics."""
         weights = config.DEFAULT_FEATURE_WEIGHTS
         financials = {
-            "sga_pct": 0.10,
+            "sga_pct": 0.60,
             "gross_margin_pct": 0.80,
-            "debt_to_equity": 0.3,
-            "fcf_yield_pct": 0.08,
-            "roic_pct": 0.20,
+            "debt_to_equity": 2.0,
+            "fcf_yield_pct": -0.05,
+            "roic_pct": -0.10,
         }
-        score = compute_vulnerability_score(financials, weights)
+        score = compute_vulnerability_score(financials, weights, pe=8.0, eps=1.0)
         assert 0.0 <= score <= 1.0
-        assert score < 0.4, f"Expected strong company score < 0.4, got {score}"
+        assert score < 0.5, f"Expected low compression risk < 0.5, got {score}"
+
+    def test_negative_eps_scores_zero_pe_premium(self):
+        """Negative EPS = P/E premium is 0 (already dead)."""
+        weights = config.DEFAULT_FEATURE_WEIGHTS
+        financials = {
+            "sga_pct": 0.50,
+            "gross_margin_pct": 0.65,
+            "debt_to_equity": 1.0,
+            "fcf_yield_pct": -0.10,
+            "roic_pct": -0.30,
+        }
+        score = compute_vulnerability_score(financials, weights, pe=0.0, eps=-1.0)
+        assert score < 0.5, f"Dead company should score < 0.5, got {score}"
 
     def test_score_bounded_zero_one(self):
         """Score must always be clamped between 0 and 1."""
         weights = config.DEFAULT_FEATURE_WEIGHTS
         extreme = {
             "sga_pct": 1.0,
-            "gross_margin_pct": 0.0,
+            "gross_margin_pct": 1.0,
             "debt_to_equity": 10.0,
             "fcf_yield_pct": -1.0,
             "roic_pct": -0.5,
         }
-        score = compute_vulnerability_score(extreme, weights)
-        assert 0.0 <= score <= 1.0
-
-    def test_missing_metric_uses_neutral(self):
-        """None values should default to neutral (0.5 contribution)."""
-        weights = config.DEFAULT_FEATURE_WEIGHTS
-        partial = {
-            "sga_pct": None,
-            "gross_margin_pct": 0.55,
-            "debt_to_equity": None,
-            "fcf_yield_pct": -0.02,
-            "roic_pct": 0.03,
-        }
-        score = compute_vulnerability_score(partial, weights)
+        score = compute_vulnerability_score(extreme, weights, pe=500.0, eps=0.5)
         assert 0.0 <= score <= 1.0
 
 
@@ -143,7 +143,7 @@ class TestScanTicker:
         assert row["vulnerability_score"] > 0
 
     def test_scan_below_gate_returns_none(self, test_db):
-        """A strong company should not pass the vulnerability gate."""
+        """An already-compressed company should not pass the gate."""
         adapter = FakeAdapter(
             financials={
                 "sga_pct": 0.10,
@@ -151,7 +151,8 @@ class TestScanTicker:
                 "debt_to_equity": 0.3,
                 "fcf_yield_pct": 0.08,
                 "roic_pct": 0.20,
-            }
+            },
+            valuation={"eps": 1.0, "pe": 8.0},  # already compressed
         )
         result = scan_ticker("CHGG", adapter, db_path=test_db)
         assert result is None
