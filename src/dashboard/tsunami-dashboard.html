@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TSUNAMI // Compression Scanner</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --bg-deep: #0a0b0f;
+  --bg-surface: #12141a;
+  --bg-card: #181b24;
+  --bg-hover: #1e2230;
+  --border: #2a2e3a;
+  --border-focus: #3d4260;
+  --text-primary: #e8eaf0;
+  --text-secondary: #8b90a0;
+  --text-dim: #555a6e;
+  --red: #ff3b5c;
+  --red-dim: rgba(255, 59, 92, 0.15);
+  --green: #00d68f;
+  --green-dim: rgba(0, 214, 143, 0.12);
+  --amber: #ffb84d;
+  --amber-dim: rgba(255, 184, 77, 0.12);
+  --blue: #4d8bff;
+  --blue-dim: rgba(77, 139, 255, 0.12);
+  --cyan: #00c9db;
+  --purple: #a855f7;
+  --gradient-red: linear-gradient(135deg, #ff3b5c, #ff1744);
+  --gradient-green: linear-gradient(135deg, #00d68f, #00b87a);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* === HEADER === */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-surface);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-brand h1 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--red), var(--amber));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header-brand .tag {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.header-actions input {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  width: 200px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.header-actions input:focus { border-color: var(--blue); }
+.header-actions input::placeholder { color: var(--text-dim); }
+
+.btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-family: 'Outfit', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn:hover { background: var(--bg-hover); border-color: var(--border-focus); }
+.btn-primary { background: var(--red); border-color: var(--red); color: white; }
+.btn-primary:hover { opacity: 0.85; }
+
+/* === LAYOUT === */
+.container {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  height: calc(100vh - 57px);
+}
+
+/* === LEFT PANEL: SCANNER LIST === */
+.scanner-panel {
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  background: var(--bg-surface);
+}
+
+.panel-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panel-header h2 {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+.panel-header .count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.ticker-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(42, 46, 58, 0.5);
+  cursor: pointer;
+  transition: background 0.15s;
+  gap: 12px;
+}
+.ticker-row:hover { background: var(--bg-hover); }
+.ticker-row.active { background: var(--bg-card); border-left: 3px solid var(--red); }
+
+.ticker-info h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.ticker-info .sector {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.score-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+.score-high { background: var(--red-dim); color: var(--red); }
+.score-med { background: var(--amber-dim); color: var(--amber); }
+.score-low { background: var(--green-dim); color: var(--green); }
+
+.signal-tag {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+.signal-short { background: var(--red-dim); color: var(--red); }
+.signal-watch { background: var(--amber-dim); color: var(--amber); }
+.signal-safe { background: var(--green-dim); color: var(--green); }
+
+/* === RIGHT PANEL: DETAIL VIEW === */
+.detail-panel {
+  overflow-y: auto;
+  padding: 24px 28px;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+.detail-ticker {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.detail-company {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+.detail-verdict {
+  text-align: right;
+}
+.detail-verdict .label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+.detail-verdict .value { font-family: 'JetBrains Mono', monospace; font-size: 28px; font-weight: 700; }
+
+/* === SCORE BREAKDOWN === */
+.breakdown-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.score-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+.score-card .card-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.score-card .card-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 600;
+}
+.score-card .card-bar {
+  height: 4px;
+  background: var(--bg-deep);
+  border-radius: 2px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.score-card .card-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+/* === THREE PATHS === */
+.paths-section {
+  margin-bottom: 28px;
+}
+.paths-section h3 {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+
+.path-row {
+  display: grid;
+  grid-template-columns: 140px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(42, 46, 58, 0.3);
+}
+.path-row .path-name { font-size: 13px; font-weight: 500; }
+.path-row .path-bar {
+  height: 8px;
+  background: var(--bg-card);
+  border-radius: 4px;
+  overflow: hidden;
+}
+.path-row .path-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+.path-row .path-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  width: 50px;
+  text-align: right;
+}
+
+/* === MOAT ANALYSIS === */
+.moat-section { margin-bottom: 28px; }
+
+.moat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.moat-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  text-align: center;
+}
+.moat-item .moat-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+.moat-item .moat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 18px;
+  font-weight: 600;
+}
+.moat-item .moat-desc {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+/* === NOTES AREA === */
+.notes-section { margin-bottom: 28px; }
+.notes-section h3 {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+.notes-textarea {
+  width: 100%;
+  min-height: 100px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.notes-textarea:focus { border-color: var(--blue); }
+.notes-textarea::placeholder { color: var(--text-dim); }
+
+/* === EMPTY STATE === */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  color: var(--text-dim);
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 16px; opacity: 0.3; }
+.empty-state p { font-size: 14px; }
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-focus); }
+
+/* === ANIMATIONS === */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.animate-in { animation: fadeIn 0.3s ease forwards; }
+
+/* === FINANCIALS TABLE === */
+.financials-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 28px;
+}
+.financials-table th {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.financials-table td {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(42, 46, 58, 0.3);
+}
+.financials-table td.metric-name {
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-brand">
+    <h1>TSUNAMI</h1>
+    <span class="tag">v0.1 // compression scanner</span>
+  </div>
+  <div class="header-actions">
+    <input type="text" id="tickerInput" placeholder="Add ticker..." />
+    <button class="btn btn-primary" onclick="addTicker()">SCAN</button>
+    <button class="btn" onclick="loadSample()">LOAD SAMPLE</button>
+  </div>
+</div>
+
+<div class="container">
+  <div class="scanner-panel">
+    <div class="panel-header">
+      <h2>Scanner Results</h2>
+      <span class="count" id="resultCount">0 targets</span>
+    </div>
+    <div id="tickerList"></div>
+  </div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="empty-state">
+      <div class="icon">&#9201;</div>
+      <p>Select a ticker or scan a new one</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// TSUNAMI DASHBOARD ENGINE
+// ============================================================
+
+const companies = new Map();
+let selectedTicker = null;
+
+// Scoring functions (mirrors Python scanner)
+function compressionRisk(pe, sga, gm, de, fcf, roic) {
+  const eps = pe > 0 ? 1 : 0;
+  const pePrem = (pe > 0 && eps > 0) ? Math.min(1, Math.max(0, (pe - 12) / 38)) : 0;
+  const mf = Math.min(1, (sga * gm) / 0.35);
+  const lev = Math.min(1, de / 5.0);
+  const cs = 1 - Math.max(0, Math.min(1, (fcf + 0.15) / 0.35));
+  const ne = (pe <= 0 || eps <= 0) ? 1.0 : 0.0;
+  const br = 1 - Math.max(0, Math.min(1, (fcf + 0.20) / 0.40));
+  const cd = 1 - Math.max(0, Math.min(1, (roic + 0.4) / 0.6));
+  const growth = pePrem * 0.55 + mf * 0.45;
+  const leverage = lev * 0.60 + cs * 0.40;
+  const burn = ne * 0.40 + br * 0.35 + cd * 0.25;
+  return { total: Math.max(growth, leverage, burn), growth, leverage, burn, pePrem, mf };
+}
+
+function moatScore(sga, gm, roic, fcf, de) {
+  const featureSignal = Math.max(0, Math.min(1, (sga - 0.15) / 0.45)) * Math.max(0, Math.min(1, (gm - 0.30) / 0.50));
+  const roicMoat = Math.max(0, Math.min(1, (roic + 0.05) / 0.30));
+  const fcfDurability = Math.max(0, Math.min(1, (fcf + 0.05) / 0.15));
+  const resilience = 1 - Math.min(1, de / 5.0);
+  const switchingCost = roicMoat;
+  const networkEffect = fcfDurability * 0.5 + (1 - featureSignal) * 0.5;
+  return {
+    total: roicMoat * 0.35 + fcfDurability * 0.25 + (1 - featureSignal) * 0.25 + resilience * 0.15,
+    switchingCost, networkEffect, featureSignal: 1 - featureSignal, resilience
+  };
+}
+
+function analyzeCompany(data) {
+  const comp = compressionRisk(data.pe, data.sga, data.gm, data.de, data.fcf, data.roic);
+  const moat = moatScore(data.sga, data.gm, data.roic, data.fcf, data.de);
+  const net = comp.total - moat.total;
+  let signal, signalClass;
+  if (net > 0.40) { signal = 'SHORT'; signalClass = 'signal-short'; }
+  else if (net > 0.15) { signal = 'WATCH'; signalClass = 'signal-watch'; }
+  else { signal = 'SAFE'; signalClass = 'signal-safe'; }
+  return { ...data, comp, moat, net, signal, signalClass };
+}
+
+function getScoreClass(net) {
+  if (net > 0.40) return 'score-high';
+  if (net > 0.15) return 'score-med';
+  return 'score-low';
+}
+
+function barColor(value) {
+  if (value > 0.7) return 'var(--red)';
+  if (value > 0.4) return 'var(--amber)';
+  return 'var(--green)';
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+
+function renderList() {
+  const list = document.getElementById('tickerList');
+  const sorted = [...companies.values()].sort((a, b) => b.net - a.net);
+  document.getElementById('resultCount').textContent = `${sorted.length} targets`;
+
+  list.innerHTML = sorted.map(c => `
+    <div class="ticker-row ${selectedTicker === c.ticker ? 'active' : ''}" onclick="selectTicker('${c.ticker}')">
+      <div class="ticker-info">
+        <h3>${c.ticker}</h3>
+        <div class="sector">${c.sector || 'Unknown'} &bull; ${c.pe > 0 ? c.pe.toFixed(0) + 'x' : 'N/E'}</div>
+      </div>
+      <span class="score-badge ${getScoreClass(c.net)}">${c.net > 0 ? '+' : ''}${c.net.toFixed(3)}</span>
+      <span class="signal-tag ${c.signalClass}">${c.signal}</span>
+    </div>
+  `).join('');
+}
+
+function renderDetail(c) {
+  const panel = document.getElementById('detailPanel');
+  const verdictColor = c.net > 0.40 ? 'var(--red)' : c.net > 0.15 ? 'var(--amber)' : 'var(--green)';
+
+  panel.innerHTML = `
+    <div class="animate-in">
+      <div class="detail-header">
+        <div>
+          <div class="detail-ticker">${c.ticker}</div>
+          <div class="detail-company">${c.company || ''} &bull; ${c.sector || 'Unknown'} &bull; $${c.price ? c.price.toFixed(2) : '—'}</div>
+        </div>
+        <div class="detail-verdict">
+          <div class="label">Net Score</div>
+          <div class="value" style="color: ${verdictColor}">${c.net > 0 ? '+' : ''}${c.net.toFixed(3)}</div>
+          <div class="signal-tag ${c.signalClass}" style="margin-top: 6px; display: inline-block;">${c.signal}</div>
+        </div>
+      </div>
+
+      <div class="breakdown-grid">
+        <div class="score-card">
+          <div class="card-label">Compression Risk</div>
+          <div class="card-value" style="color: ${barColor(c.comp.total)}">${c.comp.total.toFixed(3)}</div>
+          <div class="card-bar"><div class="card-bar-fill" style="width: ${c.comp.total * 100}%; background: ${barColor(c.comp.total)}"></div></div>
+        </div>
+        <div class="score-card">
+          <div class="card-label">Moat Defense</div>
+          <div class="card-value" style="color: var(--green)">${c.moat.total.toFixed(3)}</div>
+          <div class="card-bar"><div class="card-bar-fill" style="width: ${c.moat.total * 100}%; background: var(--green)"></div></div>
+        </div>
+        <div class="score-card">
+          <div class="card-label">P/E Multiple</div>
+          <div class="card-value">${c.pe > 0 ? c.pe.toFixed(1) + 'x' : 'N/E'}</div>
+          <div class="card-bar"><div class="card-bar-fill" style="width: ${Math.min(100, c.pe / 3)}%; background: ${c.pe > 50 ? 'var(--red)' : c.pe > 25 ? 'var(--amber)' : 'var(--green)'}"></div></div>
+        </div>
+        <div class="score-card">
+          <div class="card-label">P/E Premium</div>
+          <div class="card-value" style="color: ${barColor(c.comp.pePrem)}">${(c.comp.pePrem * 100).toFixed(0)}%</div>
+          <div class="card-bar"><div class="card-bar-fill" style="width: ${c.comp.pePrem * 100}%; background: ${barColor(c.comp.pePrem)}"></div></div>
+        </div>
+      </div>
+
+      <div class="paths-section">
+        <h3>Compression Paths</h3>
+        <div class="path-row">
+          <div class="path-name" style="color: var(--red)">Growth Crush</div>
+          <div class="path-bar"><div class="path-bar-fill" style="width: ${c.comp.growth * 100}%; background: var(--red)"></div></div>
+          <div class="path-value">${c.comp.growth.toFixed(3)}</div>
+        </div>
+        <div class="path-row">
+          <div class="path-name" style="color: var(--amber)">Leverage Kill</div>
+          <div class="path-bar"><div class="path-bar-fill" style="width: ${c.comp.leverage * 100}%; background: var(--amber)"></div></div>
+          <div class="path-value">${c.comp.leverage.toFixed(3)}</div>
+        </div>
+        <div class="path-row">
+          <div class="path-name" style="color: var(--purple)">Cash Burn</div>
+          <div class="path-bar"><div class="path-bar-fill" style="width: ${c.comp.burn * 100}%; background: var(--purple)"></div></div>
+          <div class="path-value">${c.comp.burn.toFixed(3)}</div>
+        </div>
+      </div>
+
+      <div class="moat-section">
+        <h3 style="font-size: 12px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 14px;">Moat Analysis</h3>
+        <div class="moat-grid">
+          <div class="moat-item">
+            <div class="moat-label">Switching Cost</div>
+            <div class="moat-value" style="color: ${c.moat.switchingCost > 0.5 ? 'var(--green)' : 'var(--red)'}">${(c.moat.switchingCost * 100).toFixed(0)}%</div>
+            <div class="moat-desc">Lock-in strength</div>
+          </div>
+          <div class="moat-item">
+            <div class="moat-label">Network Effect</div>
+            <div class="moat-value" style="color: ${c.moat.networkEffect > 0.5 ? 'var(--green)' : 'var(--red)'}">${(c.moat.networkEffect * 100).toFixed(0)}%</div>
+            <div class="moat-desc">Platform dynamics</div>
+          </div>
+          <div class="moat-item">
+            <div class="moat-label">Product Depth</div>
+            <div class="moat-value" style="color: ${c.moat.featureSignal > 0.5 ? 'var(--green)' : 'var(--red)'}">${(c.moat.featureSignal * 100).toFixed(0)}%</div>
+            <div class="moat-desc">Feature vs Platform</div>
+          </div>
+          <div class="moat-item">
+            <div class="moat-label">Resilience</div>
+            <div class="moat-value" style="color: ${c.moat.resilience > 0.5 ? 'var(--green)' : 'var(--red)'}">${(c.moat.resilience * 100).toFixed(0)}%</div>
+            <div class="moat-desc">Balance sheet</div>
+          </div>
+        </div>
+      </div>
+
+      <table class="financials-table">
+        <thead><tr><th>Metric</th><th>Value</th><th>Signal</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="metric-name">SG&A % Revenue</td>
+            <td>${(c.sga * 100).toFixed(1)}%</td>
+            <td style="color: ${c.sga > 0.40 ? 'var(--red)' : c.sga > 0.25 ? 'var(--amber)' : 'var(--green)'}">${c.sga > 0.40 ? 'HIGH' : c.sga > 0.25 ? 'MODERATE' : 'LOW'}</td>
+          </tr>
+          <tr>
+            <td class="metric-name">Gross Margin</td>
+            <td>${(c.gm * 100).toFixed(1)}%</td>
+            <td style="color: var(--text-secondary)">${c.gm > 0.70 ? 'Fat target' : c.gm > 0.50 ? 'Moderate' : 'Lean'}</td>
+          </tr>
+          <tr>
+            <td class="metric-name">Debt / Equity</td>
+            <td>${c.de.toFixed(2)}x</td>
+            <td style="color: ${c.de > 3 ? 'var(--red)' : c.de > 1 ? 'var(--amber)' : 'var(--green)'}">${c.de > 3 ? 'DANGER' : c.de > 1 ? 'ELEVATED' : 'HEALTHY'}</td>
+          </tr>
+          <tr>
+            <td class="metric-name">FCF Yield</td>
+            <td>${(c.fcf * 100).toFixed(2)}%</td>
+            <td style="color: ${c.fcf < 0 ? 'var(--red)' : c.fcf < 0.03 ? 'var(--amber)' : 'var(--green)'}">${c.fcf < 0 ? 'BURNING' : c.fcf < 0.03 ? 'WEAK' : 'GENERATING'}</td>
+          </tr>
+          <tr>
+            <td class="metric-name">ROIC</td>
+            <td>${(c.roic * 100).toFixed(2)}%</td>
+            <td style="color: ${c.roic < 0 ? 'var(--red)' : c.roic < 0.08 ? 'var(--amber)' : 'var(--green)'}">${c.roic < 0 ? 'DESTROYING' : c.roic < 0.08 ? 'POOR' : 'EFFICIENT'}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="notes-section">
+        <h3>Analysis Notes</h3>
+        <textarea class="notes-textarea" placeholder="Why is this a feature or a platform? What's the moat? Who's the competitor eating their lunch?"
+          oninput="saveNotes('${c.ticker}', this.value)">${c.notes || ''}</textarea>
+      </div>
+    </div>
+  `;
+}
+
+function selectTicker(ticker) {
+  selectedTicker = ticker;
+  const c = companies.get(ticker);
+  if (c) renderDetail(c);
+  renderList();
+}
+
+function saveNotes(ticker, text) {
+  const c = companies.get(ticker);
+  if (c) c.notes = text;
+}
+
+function addCompany(data) {
+  const analyzed = analyzeCompany(data);
+  companies.set(data.ticker, analyzed);
+  renderList();
+  if (!selectedTicker) selectTicker(data.ticker);
+}
+
+function addTicker() {
+  const input = document.getElementById('tickerInput');
+  const ticker = input.value.trim().toUpperCase();
+  if (!ticker) return;
+  // Placeholder -- in production this hits the Python backend
+  alert('Connect to Python backend: tsunami scan ' + ticker);
+  input.value = '';
+}
+
+function loadSample() {
+  const samples = [
+    { ticker: 'PLTR', company: 'Palantir', sector: 'Enterprise Software', pe: 227, sga: 0.38, gm: 0.82, de: 0.10, fcf: 0.02, roic: 0.17, price: 98.50, notes: 'High P/E but growing fast. Government contracts = switching cost. Is the moat real or is it hype?' },
+    { ticker: 'HUBS', company: 'HubSpot', sector: 'Marketing SaaS', pe: 268, sga: 0.54, gm: 0.84, de: 0.04, fcf: 0.01, roic: 0.02, price: 720.00, notes: 'CRM for SMBs. High SGA selling to small businesses. Salesforce could clone this. Feature or platform?' },
+    { ticker: 'DDOG', company: 'Datadog', sector: 'Observability', pe: 369, sga: 0.36, gm: 0.80, de: 0.11, fcf: 0.02, roic: 0.02, price: 145.00, notes: '369x P/E. Observability platform but Grafana is free. Strong product but pricing pressure coming.' },
+    { ticker: 'WDAY', company: 'Workday', sector: 'HR/Finance SaaS', pe: 48, sga: 0.37, gm: 0.76, de: 0.16, fcf: 0.03, roic: 0.05, price: 260.00, notes: 'Enterprise HR. Very sticky contracts. DEEP switching costs. Probably safe despite high P/E.' },
+    { ticker: 'ZM', company: 'Zoom', sector: 'Video Comms', pe: 12, sga: 0.28, gm: 0.76, de: 0.02, fcf: 0.06, roic: 0.10, price: 72.00, notes: 'ALREADY COMPRESSED. Was 130x, now 12x. Video call was a feature. Teams ate it. Nothing left.' },
+    { ticker: 'DOCU', company: 'DocuSign', sector: 'E-Signature', pe: 13, sga: 0.42, gm: 0.80, de: 0.60, fcf: 0.04, roic: 0.04, price: 88.00, notes: 'ALREADY COMPRESSED. E-sign is a feature built into everything now. Adobe Sign. No moat.' },
+    { ticker: 'NVDA', company: 'NVIDIA', sector: 'Semiconductors', pe: 55, sga: 0.10, gm: 0.75, de: 0.17, fcf: 0.03, roic: 0.50, price: 130.00, notes: 'GPU + CUDA ecosystem. DEEP platform moat. Developers locked in. AMD cant replicate CUDA.' },
+    { ticker: 'META', company: 'Meta Platforms', sector: 'Social/Advertising', pe: 26, sga: 0.22, gm: 0.82, de: 0.12, fcf: 0.06, roic: 0.22, price: 610.00, notes: 'Social graph + ad network. Strongest network effects on planet. Recovered from 75% drop. DEEP moat.' },
+    { ticker: 'CHGG', company: 'Chegg', sector: 'EdTech', pe: 0, sga: 0.65, gm: 0.64, de: 0.61, fcf: -0.17, roic: -0.60, price: 0.68, notes: 'DEAD. Homework answers was a feature. ChatGPT IS the replacement. $0.68 stock. Terminal.' },
+    { ticker: 'CRM', company: 'Salesforce', sector: 'Enterprise CRM', pe: 32, sga: 0.39, gm: 0.77, de: 0.10, fcf: 0.04, roic: 0.08, price: 280.00, notes: 'Enterprise CRM platform. Massive switching costs. Ecosystem of apps. Platform, not a feature.' },
+    { ticker: 'GPRO', company: 'GoPro', sector: 'Consumer Hardware', pe: 12, sga: 0.30, gm: 0.35, de: 0.55, fcf: 0.02, roic: 0.03, price: 1.20, notes: 'DEAD. Action camera was a feature. Phone cameras killed the category. Zero switching cost.' },
+    { ticker: 'SNAP', company: 'Snap Inc', sector: 'Social Media', pe: 0, sga: 0.45, gm: 0.55, de: 1.50, fcf: -0.03, roic: -0.05, price: 8.50, notes: 'Disappearing messages was a feature. Instagram Stories cloned it perfectly. Weak moat.' },
+  ];
+
+  companies.clear();
+  samples.forEach(s => addCompany(s));
+  selectTicker('PLTR');
+}
+
+// Init
+loadSample();
+</script>
+</body>
+</html>
