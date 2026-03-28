@@ -1,0 +1,26 @@
+{
+    "EdTech": {
+        "eps_decay": 0.25,
+        "terminal_pe": 13.0
+    },
+    "BPO/CallCenter": {
+        "eps_decay": 0.15,
+        "terminal_pe": 12.0
+    },
+    "IT Services": {
+        "eps_decay": 0.10,
+        "terminal_pe": 14.0
+    },
+    "Legal Services": {
+        "eps_decay": 0.12,
+        "terminal_pe": 10.0
+    },
+    "Freelance/Gig": {
+        "eps_decay": 0.20,
+        "terminal_pe": 11.0
+    },
+    "Media/Stock Images": {
+        "eps_decay": 0.18,
+        "terminal_pe": 12.0
+    }
+}

@@ -1,0 +1,11 @@
+ticker,company,sector,peak_date,peak_price,trough_date,trough_price,catalyst
+CHGG,Chegg,EdTech,2021-02-16,113.88,2024-01-01,9.17,ChatGPT homework replacement
+FVRR,Fiverr,Freelance/Gig,2021-02-12,336.10,2024-01-01,24.36,AI automates gig tasks
+UPWK,Upwork,Freelance/Gig,2021-10-15,63.43,2024-01-01,11.56,AI reduces freelance demand
+TEP.PA,Teleperformance,BPO/CallCenter,2022-08-15,390.00,2024-01-01,118.00,AI chatbots replace agents
+TASK,TaskUs,BPO/CallCenter,2021-11-12,85.49,2024-01-01,13.55,AI replaces content moderation
+SSTK,Shutterstock,Media/Stock Images,2022-11-14,68.49,2024-01-01,36.28,AI image generation
+TWOU,2U Inc,EdTech,2021-02-16,49.38,2024-01-01,0.61,AI tutoring displaces online degrees
+GETY,Getty Images,Media/Stock Images,2023-02-01,7.50,2024-01-01,3.11,AI image generation
+EPAM,EPAM Systems,IT Services,2021-11-12,740.24,2024-01-01,259.62,AI coding assistants
+COUR,Coursera,EdTech,2021-04-01,62.53,2024-01-01,14.65,AI tutoring and content generation
